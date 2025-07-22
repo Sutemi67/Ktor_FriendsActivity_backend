@@ -19,7 +19,7 @@ fun Application.configureRegisterRouting() {
 //            }
             if (InMemoryCache.userList.map { it.login }.contains(receive.login)) {
                 call.respond(HttpStatusCode.Conflict, "User is already exists")
-                println("Existing user try")
+                println("Existing user try: ${receive.login}")
                 return@post
             }
 
@@ -27,7 +27,7 @@ fun Application.configureRegisterRouting() {
             InMemoryCache.userList.add(receive)
             InMemoryCache.token.add(TokenCache(login = receive.login, token = token))
             call.respond(RegisterResponseRemote(token = token))
-            println("Successful register happened")
+            println("Successful register happened: ${receive.login}")
         }
     }
 }
