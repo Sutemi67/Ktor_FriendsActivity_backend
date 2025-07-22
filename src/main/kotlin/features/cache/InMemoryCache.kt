@@ -12,3 +12,4 @@ object InMemoryCache {
     val userList: MutableList<RegisterReceiveRemote> = mutableListOf()
     val token: MutableList<TokenCache> = mutableListOf()
 }
+
