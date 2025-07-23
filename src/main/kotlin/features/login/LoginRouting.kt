@@ -20,9 +20,14 @@ fun Application.configureLoginRouting() {
 
             } else {
                 if (firstMatch.password == receive.password) {
-                    val token = UUID.randomUUID().toString()
-                    InMemoryCache.token.add(TokenCache(login = receive.login, token = token))
-                    call.respond(LoginResponseRemote(token = token))
+                    val existingToken = InMemoryCache.token.firstOrNull { it.login == receive.login }
+                    if (existingToken != null) {
+                        call.respond(LoginResponseRemote(token = existingToken.token))
+                    } else {
+                        val token = UUID.randomUUID().toString()
+                        InMemoryCache.token.add(TokenCache(login = receive.login, token = token))
+                        call.respond(LoginResponseRemote(token = token))
+                    }
                 } else {
                     call.respond(HttpStatusCode.BadRequest, "Password is incorrect")
                 }
