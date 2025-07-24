@@ -17,19 +17,24 @@ fun Application.configureLoginRouting() {
 
             if (firstMatch == null) {
                 call.respond(HttpStatusCode.BadRequest, "User does not exists")
-
+                println("User ${receive.login} does not exists")
             } else {
                 if (firstMatch.password == receive.password) {
                     val existingToken = InMemoryCache.token.firstOrNull { it.login == receive.login }
                     if (existingToken != null) {
                         call.respond(LoginResponseRemote(token = existingToken.token))
+                        println("User ${receive.login} logged in by token")
+
                     } else {
                         val token = UUID.randomUUID().toString()
                         InMemoryCache.token.add(TokenCache(login = receive.login, token = token))
                         call.respond(LoginResponseRemote(token = token))
+                        println("User ${receive.login} - successful login, got a new token")
                     }
                 } else {
                     call.respond(HttpStatusCode.BadRequest, "Password is incorrect")
+                    println("User ${receive.login} password incorrect")
+
                 }
             }
         }
