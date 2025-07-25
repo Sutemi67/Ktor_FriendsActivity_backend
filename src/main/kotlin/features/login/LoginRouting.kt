@@ -34,7 +34,6 @@ fun Application.configureLoginRouting() {
                 } else {
                     call.respond(HttpStatusCode.BadRequest, "Password is incorrect")
                     println("User ${receive.login} password incorrect")
-
                 }
             }
         }

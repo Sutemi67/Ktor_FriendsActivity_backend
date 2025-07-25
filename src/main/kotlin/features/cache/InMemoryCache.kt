@@ -1,7 +1,7 @@
 package apc.appcradle.features.cache
 
 import apc.appcradle.features.register.RegisterReceiveRemote
-
+import kotlinx.serialization.Serializable
 
 data class TokenCache(
     val login: String,
@@ -11,5 +11,8 @@ data class TokenCache(
 object InMemoryCache {
     val userList: MutableList<RegisterReceiveRemote> = mutableListOf()
     val token: MutableList<TokenCache> = mutableListOf()
+    val userActivity: MutableList<UserActivity> = mutableListOf()
 }
+
+
 
