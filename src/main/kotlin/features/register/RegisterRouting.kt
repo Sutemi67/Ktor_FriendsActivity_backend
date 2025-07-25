@@ -14,9 +14,6 @@ fun Application.configureRegisterRouting() {
         post("/register") {
             val receive = call.receive<RegisterReceiveRemote>()
 
-//            if (!receive.email.checkEmailIsValid()) {
-//                call.respond(HttpStatusCode.BadRequest, "Email is not valid")
-//            }
             if (InMemoryCache.userList.map { it.login }.contains(receive.login)) {
                 call.respond(HttpStatusCode.Conflict, "User is already exists")
                 println("Existing user try: ${receive.login}")
