@@ -11,7 +11,6 @@ application {
     mainClass = "io.ktor.server.netty.EngineMain"
 }
 
-// Настройка JVM-целей для совместимости
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(17))
@@ -38,6 +37,7 @@ dependencies {
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
 }
+
 tasks.jar.configure {
     manifest {
         attributes(mapOf("Main-Class" to "apc.appcradle.ApplicationKt"))
