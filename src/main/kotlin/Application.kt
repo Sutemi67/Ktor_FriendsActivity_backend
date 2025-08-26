@@ -15,7 +15,6 @@ fun main(args: Array<String>) {
     ) {
         module()
     }.start(wait = true)
-//    EngineMain.main(args)
 }
 
 
