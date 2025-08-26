@@ -9,9 +9,9 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import java.util.*
 
-class LoginController(private val call: ApplicationCall) {
+class LoginController() {
 
-    suspend fun loginUser() {
+    suspend fun loginUser(call: ApplicationCall) {
         val receive = call.receive<LoginReceiveRemote>()
         val userDTO = Users.fetchUser(receive.login)
 
@@ -34,6 +34,19 @@ class LoginController(private val call: ApplicationCall) {
                 call.respond(HttpStatusCode.BadRequest, "Password is incorrect")
                 println("User ${receive.login} password incorrect")
             }
+        }
+    }
+
+    suspend fun changeLogin(call: ApplicationCall) {
+        val receive = call.receive<LoginChange>()
+        val userDTO = Users.fetchUser(receive.login)
+        if (userDTO == null) {
+            call.respond(HttpStatusCode.BadRequest, "User does not exists")
+            println("User ${receive.login} does not exists")
+        } else {
+            Users.changeLogin(userDTO.copy(changeLogin = receive.newLogin))
+            call.respond(HttpStatusCode.OK, "login changed")
+            println("User ${userDTO.login} changed login to ${receive.newLogin}")
         }
     }
 }

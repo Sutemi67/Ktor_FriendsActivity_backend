@@ -12,3 +12,9 @@ data class LoginReceiveRemote(
 data class LoginResponseRemote(
     val token: String
 )
+
+@Serializable
+data class LoginChange(
+    val login: String,
+    val newLogin: String
+)

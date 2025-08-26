@@ -1,7 +1,7 @@
 package apc.appcradle.features.register
 
-import apc.appcradle.database.tokens.database.tokens.TokenDTO
-import apc.appcradle.database.tokens.database.tokens.database.tokens.database.tokens.Tokens
+import apc.appcradle.database.tokens.TokenDTO
+import apc.appcradle.database.tokens.Tokens
 import apc.appcradle.database.users.UserDTO
 import apc.appcradle.database.users.Users
 import io.ktor.http.*
@@ -31,6 +31,7 @@ class RegisterController(private val call: ApplicationCall) {
                 userDTO = UserDTO(
                     login = registerReceiveRemote.login,
                     password = registerReceiveRemote.password,
+                    steps = 0
                 )
             )
             Tokens.insert(

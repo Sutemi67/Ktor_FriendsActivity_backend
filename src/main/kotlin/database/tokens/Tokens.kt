@@ -1,12 +1,8 @@
-package apc.appcradle.database.tokens.database.tokens.database.tokens.database.tokens
+package apc.appcradle.database.tokens
 
-import apc.appcradle.database.tokens.database.tokens.TokenDTO
-import apc.appcradle.database.users.UserDTO
 import org.jetbrains.exposed.v1.core.Table
-import org.jetbrains.exposed.v1.core.statements.UpsertSqlExpressionBuilder.eq
-import org.jetbrains.exposed.v1.jdbc.insert
-import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.jdbc.upsert
 
 object Tokens : Table() {
     private val login = varchar(name = "login", length = 25)
@@ -14,7 +10,11 @@ object Tokens : Table() {
 
     fun insert(tokenDTO: TokenDTO) {
         transaction {
-            Tokens.insert {
+            Tokens.upsert(
+                login,
+                onUpdate = { it[token] = tokenDTO.token },
+                where = { login eq tokenDTO.login }
+            ) {
                 it[login] = tokenDTO.login
                 it[token] = tokenDTO.token
             }

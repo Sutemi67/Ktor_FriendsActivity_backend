@@ -1,4 +1,4 @@
-package apc.appcradle.database.tokens.database.tokens
+package apc.appcradle.database.tokens
 
 class TokenDTO(
     val login: String,

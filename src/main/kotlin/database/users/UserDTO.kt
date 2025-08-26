@@ -1,7 +1,8 @@
 package apc.appcradle.database.users
 
-class UserDTO(
+data class UserDTO(
     val login: String,
     val password: String,
-//    val steps: Int?,
+    val steps: Int,
+    val changeLogin: String? = null
 )
