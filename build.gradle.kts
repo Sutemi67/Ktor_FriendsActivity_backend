@@ -37,10 +37,11 @@ dependencies {
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
 
-    //BD Exposed
+    //BD Exposed & PostgreSQL
     implementation(libs.exposed.core)
     implementation(libs.exposed.jdbc)
     implementation(libs.h2)
+    implementation("org.postgresql:postgresql:42.7.7")
 }
 
 tasks.jar.configure {
