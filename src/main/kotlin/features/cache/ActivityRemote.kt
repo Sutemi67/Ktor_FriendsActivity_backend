@@ -11,6 +11,6 @@ data class UserActivity(
 
 @Serializable
 data class UserActivityResponse(
-    val friendsList: MutableList<UserActivity>,
+    val friendsList: List<UserActivity>,
     val errorMessage: String?
 )

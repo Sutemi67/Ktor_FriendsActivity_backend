@@ -1,5 +1,6 @@
 package apc.appcradle.database.users
 
+import apc.appcradle.features.cache.UserActivity
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
@@ -44,27 +45,38 @@ object Users : Table() {
         }
     }
 
-    fun updateSteps(userDTO: UserDTO) {
+    fun updateSteps(userDTO: UserDTO): List<UserActivity> {
         try {
+            var list = emptyList<UserActivity>()
             transaction {
                 Users.update({ login eq userDTO.login }) {
                     it[steps] = userDTO.steps
                 }
             }
+            transaction {
+                val userList = Users.selectAll().toList()
+                list = userList.map { it ->
+                    UserActivity(login = it[login], steps = it[steps])
+                }.sortedByDescending { it.steps }
+            }
+            return list
         } catch (e: Exception) {
-            println(e.message)
+            println("--user: ${userDTO.login}, ${e.message}")
+            return emptyList()
         }
     }
 
-    fun changeLogin(userDTO: UserDTO) {
-        try {
+    fun changeLogin(userDTO: UserDTO): String? {
+        return try {
             transaction {
                 Users.update({ login eq userDTO.login }) {
                     it[login] = userDTO.changeLogin ?: ""
                 }
             }
+            null
         } catch (e: Exception) {
             println(e.message)
+            "${e.message}"
         }
     }
 }

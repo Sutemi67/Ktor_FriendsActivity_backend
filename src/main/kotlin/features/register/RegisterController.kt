@@ -15,10 +15,7 @@ class RegisterController(private val call: ApplicationCall) {
     suspend fun registerUser() {
         try {
             val registerReceiveRemote = call.receive<RegisterReceiveRemote>()
-            println("get post -> $registerReceiveRemote")
-
             val userDTO = Users.fetchUser(registerReceiveRemote.login)
-            println("fetched userDTO -> ${userDTO?.login}, ${userDTO?.password}")
 
             if (userDTO != null) {
                 call.respond(HttpStatusCode.Conflict, "User is already exists")
@@ -26,7 +23,6 @@ class RegisterController(private val call: ApplicationCall) {
                 return
             }
             val token = UUID.randomUUID().toString()
-
             Users.insert(
                 userDTO = UserDTO(
                     login = registerReceiveRemote.login,
@@ -43,6 +39,7 @@ class RegisterController(private val call: ApplicationCall) {
             call.respond(RegisterResponseRemote(token = token))
             println("Successful register happened: ${registerReceiveRemote.login}")
         } catch (e: Exception) {
+            call.respond(HttpStatusCode.BadRequest, "Error in register action :(")
             println(e.message)
         }
     }

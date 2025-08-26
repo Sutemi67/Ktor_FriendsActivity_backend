@@ -7,7 +7,7 @@ fun Application.configureUserActivityRouting() {
     routing {
         post("/post_activity") {
             val controller = ActivityController()
-            controller.updateUserData(call)
+            controller.updateSteps(call)
         }
     }
 }

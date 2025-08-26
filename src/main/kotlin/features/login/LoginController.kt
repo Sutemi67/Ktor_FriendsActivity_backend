@@ -1,8 +1,6 @@
 package apc.appcradle.features.login
 
 import apc.appcradle.database.users.Users
-import apc.appcradle.features.cache.InMemoryCache
-import apc.appcradle.features.cache.TokenCache
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -20,16 +18,9 @@ class LoginController() {
             println("User ${receive.login} does not exists")
         } else {
             if (userDTO.password == receive.password) {
-                val existingToken = InMemoryCache.token.firstOrNull { it.login == receive.login }
-                if (existingToken != null) {
-                    call.respond(LoginResponseRemote(token = existingToken.token))
-                    println("User ${receive.login} logged in by token")
-                } else {
-                    val token = UUID.randomUUID().toString()
-                    InMemoryCache.token.add(TokenCache(login = receive.login, token = token))
-                    call.respond(LoginResponseRemote(token = token))
-                    println("User ${receive.login} - successful login, got a new token")
-                }
+                val token = UUID.randomUUID().toString()
+                call.respond(LoginResponseRemote(token = token))
+                println("User ${receive.login} - successful login, got a new token")
             } else {
                 call.respond(HttpStatusCode.BadRequest, "Password is incorrect")
                 println("User ${receive.login} password incorrect")
@@ -44,9 +35,14 @@ class LoginController() {
             call.respond(HttpStatusCode.BadRequest, "User does not exists")
             println("User ${receive.login} does not exists")
         } else {
-            Users.changeLogin(userDTO.copy(changeLogin = receive.newLogin))
-            call.respond(HttpStatusCode.OK, "login changed")
-            println("User ${userDTO.login} changed login to ${receive.newLogin}")
+            val isSuccess = Users.changeLogin(userDTO.copy(changeLogin = receive.newLogin))
+            if (isSuccess.isNullOrEmpty()) {
+                call.respond(HttpStatusCode.OK, "login changed")
+                println("User ${userDTO.login} changed login to ${receive.newLogin}")
+            } else {
+                call.respond(HttpStatusCode.BadRequest, "error due to nick changing")
+                println("User ${userDTO.login} error in nick change")
+            }
         }
     }
 }
