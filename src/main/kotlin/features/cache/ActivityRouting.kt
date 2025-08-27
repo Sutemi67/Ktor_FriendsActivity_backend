@@ -4,9 +4,10 @@ import io.ktor.server.application.*
 import io.ktor.server.routing.*
 
 fun Application.configureUserActivityRouting() {
+    val controller = ActivityController()
+
     routing {
         post("/post_activity") {
-            val controller = ActivityController()
             controller.updateSteps(call)
         }
     }

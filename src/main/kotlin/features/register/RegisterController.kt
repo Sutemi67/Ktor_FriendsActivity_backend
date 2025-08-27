@@ -10,9 +10,9 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import java.util.*
 
-class RegisterController(private val call: ApplicationCall) {
+class RegisterController() {
 
-    suspend fun registerUser() {
+    suspend fun registerUser(call: ApplicationCall) {
         try {
             val registerReceiveRemote = call.receive<RegisterReceiveRemote>()
             val userDTO = Users.fetchUser(registerReceiveRemote.login)
