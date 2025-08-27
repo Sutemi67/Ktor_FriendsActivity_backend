@@ -34,3 +34,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+/database.properties
+*properties
+/src/main/kotlin/Passwords.kt

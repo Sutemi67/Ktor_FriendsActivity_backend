@@ -9,15 +9,15 @@ import io.ktor.server.netty.*
 import org.jetbrains.exposed.v1.jdbc.Database
 
 fun main(args: Array<String>) {
-    Database.connect(
-//        url = "jdbc:postgresql://192.168.0.12:5432/friends_activity",
-        url = "jdbc:postgresql://localhost:5432/friends",
-        driver = "org.postgresql.Driver",
-        user = "postgres",
-//        user = "sergey_sql",
-//        password = "t1ued790"
-        password = "Uxs5y7rbhnbx4wtv"
-    )
+
+    with(LocalPasswords) {
+        Database.connect(
+            url = URL,
+            driver = DRIVER,
+            user = USER,
+            password = PASSWORD
+        )
+    }
 
     embeddedServer(
         factory = Netty,
