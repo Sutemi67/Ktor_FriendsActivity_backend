@@ -10,7 +10,7 @@ import org.jetbrains.exposed.v1.jdbc.Database
 
 fun main(args: Array<String>) {
 
-    with(LocalPasswords) {
+    with(ServerPasswords) {
         Database.connect(
             url = URL,
             driver = DRIVER,
