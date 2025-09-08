@@ -9,14 +9,14 @@ import io.ktor.server.response.*
 class ActivityController() {
 
     suspend fun updateSteps(call: ApplicationCall) {
-        val receive = call.receive<UserActivity>()
+        val receive = call.receive<UsersActivity>()
         val userDTO = Users.fetchUser(receive.login)
 
         if (userDTO == null) {
             call.respond(HttpStatusCode.BadRequest, "User does not exists")
             println("User ${receive.login} does not exists, so cant fetch data")
         } else {
-            val newList = Users.updateSteps(userDTO.copy(steps = receive.steps))
+            val newList = Users.loadStepsGetList(userDTO.copy(steps = receive.steps))
             println("User ${receive.login} fetched data, steps: ${receive.steps}")
             call.respond(
                 UserActivityResponse(

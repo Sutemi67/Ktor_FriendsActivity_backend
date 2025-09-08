@@ -27,7 +27,8 @@ class RegisterController() {
                 userDTO = UserDTO(
                     login = registerReceiveRemote.login,
                     password = registerReceiveRemote.password,
-                    steps = 0
+                    steps = 0,
+                    weeklySteps = 0
                 )
             )
             Tokens.insert(

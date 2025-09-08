@@ -1,6 +1,6 @@
 package apc.appcradle.database.users
 
-import apc.appcradle.features.cache.UserActivity
+import apc.appcradle.features.cache.UsersActivity
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
@@ -11,6 +11,7 @@ object Users : Table() {
     private val login = varchar(name = "login", length = 25)
     private val password = varchar(name = "password", length = 25)
     private val steps = integer(name = "steps")
+    private val weeklySteps = integer(name = "weeklySteps")
     private val changeLogin = varchar(name = "changeLogin", length = 25)
 
     fun insert(userDTO: UserDTO) {
@@ -20,6 +21,7 @@ object Users : Table() {
                     it[login] = userDTO.login
                     it[password] = userDTO.password
                     it[steps] = userDTO.steps
+                    it[weeklySteps] = userDTO.weeklySteps
                 }
             }
         } catch (e: Exception) {
@@ -36,7 +38,8 @@ object Users : Table() {
                 UserDTO(
                     login = userModel[Users.login],
                     password = userModel[password],
-                    steps = userModel[steps]
+                    steps = userModel[steps],
+                    weeklySteps = userModel[weeklySteps]
                 )
             }
         } catch (e: Exception) {
@@ -45,19 +48,24 @@ object Users : Table() {
         }
     }
 
-    fun updateSteps(userDTO: UserDTO): List<UserActivity> {
+    fun loadStepsGetList(userDTO: UserDTO): List<UsersActivity> {
         try {
-            var list = emptyList<UserActivity>()
+            var list = emptyList<UsersActivity>()
             transaction {
                 Users.update({ login eq userDTO.login }) {
                     it[steps] = userDTO.steps
+                    it[weeklySteps] = userDTO.weeklySteps
                 }
             }
             transaction {
                 val userList = Users.selectAll().toList()
                 list = userList.map { it ->
-                    UserActivity(login = it[login], steps = it[steps])
-                }.sortedByDescending { it.steps }
+                    UsersActivity(
+                        login = it[login],
+                        steps = it[steps],
+                        weeklySteps = it[weeklySteps]
+                    )
+                }.sortedByDescending { it.weeklySteps }
             }
             return list
         } catch (e: Exception) {
