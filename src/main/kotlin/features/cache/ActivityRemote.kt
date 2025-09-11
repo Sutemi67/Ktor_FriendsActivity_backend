@@ -4,13 +4,14 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class UserActivity(
+data class UsersActivity(
     val login: String,
-    val steps: Int
+    val steps: Int,
+    val weeklySteps: Int
 )
 
 @Serializable
 data class UserActivityResponse(
-    val friendsList: MutableList<UserActivity>,
+    val friendsList: List<UsersActivity>,
     val errorMessage: String?
 )
