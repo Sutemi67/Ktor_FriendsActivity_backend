@@ -43,7 +43,7 @@ object Users : Table() {
                 )
             }
         } catch (e: Exception) {
-            println("fetching data -> ${e.message}")
+            println("Users.kt, fetchUser -> login: $login, error: ${e.message}")
             null
         }
     }
@@ -69,7 +69,7 @@ object Users : Table() {
             }
             return list
         } catch (e: Exception) {
-            println("--user: ${userDTO.login}, ${e.message}")
+            println("Users.kt, loadStepsGetList: ${userDTO.login}, ${e.message}")
             return emptyList()
         }
     }
