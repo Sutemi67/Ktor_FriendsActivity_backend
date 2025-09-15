@@ -73,7 +73,6 @@ class ActivityController() {
                 } catch (e: Exception) {
                     println("[WeeklyReset] Error: ${e.message}")
                 }
-
                 delay(Duration.ofDays(7).toMillis())
             }
         }
