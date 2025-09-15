@@ -1,6 +1,7 @@
 package apc.appcradle.database.users
 
-import apc.appcradle.features.cache.UsersActivity
+import apc.appcradle.database.ahievements.Achievements
+import apc.appcradle.features.activity.UsersActivity
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
@@ -12,6 +13,8 @@ object Users : Table() {
     private val password = varchar(name = "password", length = 25)
     private val steps = integer(name = "steps")
     private val weeklySteps = integer(name = "weeklySteps")
+
+    //    private val wasBestUserTimes = integer(name = "wasBestUserTimes")
     private val changeLogin = varchar(name = "changeLogin", length = 25)
 
     fun insert(userDTO: UserDTO) {
@@ -48,6 +51,32 @@ object Users : Table() {
         }
     }
 
+    fun loadUserData(login: String): FetchedData {
+        return try {
+            val user = fetchUser(login)
+            if (user != null) {
+                val whoLeader = Achievements.getLeader()
+                FetchedData(
+                    steps = user.steps,
+                    weeklySteps = user.weeklySteps,
+                    currentLeader = whoLeader,
+                )
+            } else {
+                FetchedData(
+                    steps = 0,
+                    weeklySteps = 0,
+                    errorMessage = "User not found"
+                )
+            }
+        } catch (e: Exception) {
+            FetchedData(
+                steps = 0,
+                weeklySteps = 0,
+                errorMessage = e.message
+            )
+        }
+    }
+
     fun loadStepsGetList(userDTO: UserDTO): List<UsersActivity> {
         try {
             var list = emptyList<UsersActivity>()
@@ -63,7 +92,8 @@ object Users : Table() {
                     UsersActivity(
                         login = it[login],
                         steps = it[steps],
-                        weeklySteps = it[weeklySteps]
+                        weeklySteps = it[weeklySteps],
+//                        wasBestUserTimes = it[wasBestUserTimes]
                     )
                 }.sortedByDescending { it.weeklySteps }
             }
@@ -85,6 +115,36 @@ object Users : Table() {
         } catch (e: Exception) {
             println(e.message)
             "${e.message}"
+        }
+    }
+
+    fun resetAllWeeklySteps() {
+        try {
+            transaction {
+                val userList = Users.selectAll().toList()
+                val bestUserWeekly = userList.map { it ->
+                    UsersActivity(
+                        login = it[login],
+                        steps = it[steps],
+                        weeklySteps = it[weeklySteps],
+//                        wasBestUserTimes = it[wasBestUserTimes]
+                    )
+                }.maxByOrNull { it.weeklySteps }
+
+                if (bestUserWeekly != null) {
+                    Achievements.updateLeader(bestUserWeekly.login)
+//                    Users.update({ login eq bestUserWeekly.login }) {
+//                        it[wasBestUserTimes] = bestUserWeekly.wasBestUserTimes + 1
+//                    }
+                }
+
+                Users.update {
+                    it[weeklySteps] = 0
+                }
+            }
+            println("Users.kt, resetAllWeeklySteps -> All weekly data has cleared successfully")
+        } catch (e: Exception) {
+            println("Users.kt, resetAllWeeklySteps -> ${e.message}")
         }
     }
 }
