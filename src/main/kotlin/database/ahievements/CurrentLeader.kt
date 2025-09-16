@@ -5,12 +5,12 @@ import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
 
-object Achievements : Table() {
+object CurrentLeader : Table() {
     private val currentLeader = varchar(name = "currentleader", length = 25)
 
     fun updateLeader(winnerLogin: String) {
         transaction {
-            Achievements.update() {
+            CurrentLeader.update {
                 it[currentLeader] = winnerLogin
             }
         }
@@ -19,8 +19,8 @@ object Achievements : Table() {
     fun getLeader(): String? {
         return try {
             transaction {
-                val leader = Achievements.selectAll().single()
-                leader[currentLeader]
+                val leader = CurrentLeader.selectAll().singleOrNull()
+                if (leader != null) leader[currentLeader] else null
             }
         } catch (e: Exception) {
             print("Achievements -> cant get leader! Error : ${e.message}")

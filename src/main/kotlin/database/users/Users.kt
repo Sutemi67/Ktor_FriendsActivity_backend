@@ -1,6 +1,6 @@
 package apc.appcradle.database.users
 
-import apc.appcradle.database.ahievements.Achievements
+import apc.appcradle.database.ahievements.CurrentLeader
 import apc.appcradle.features.activity.UsersActivity
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.jdbc.insert
@@ -55,7 +55,7 @@ object Users : Table() {
         return try {
             val user = fetchUser(login)
             if (user != null) {
-                val whoLeader = Achievements.getLeader()
+                val whoLeader = CurrentLeader.getLeader()
                 FetchedData(
                     steps = user.steps,
                     weeklySteps = user.weeklySteps,
@@ -132,7 +132,7 @@ object Users : Table() {
                 }.maxByOrNull { it.weeklySteps }
 
                 if (bestUserWeekly != null) {
-                    Achievements.updateLeader(bestUserWeekly.login)
+                    CurrentLeader.updateLeader(bestUserWeekly.login)
 //                    Users.update({ login eq bestUserWeekly.login }) {
 //                        it[wasBestUserTimes] = bestUserWeekly.wasBestUserTimes + 1
 //                    }

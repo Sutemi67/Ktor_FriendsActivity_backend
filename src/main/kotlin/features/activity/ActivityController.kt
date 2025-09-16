@@ -1,12 +1,13 @@
 package apc.appcradle.features.activity
 
-import apc.appcradle.database.ahievements.Achievements
+import apc.appcradle.database.ahievements.CurrentLeader
 import apc.appcradle.database.users.Users
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import kotlinx.coroutines.*
+import org.jetbrains.exposed.v1.jdbc.transactions.experimental.newSuspendedTransaction
 import java.time.*
 import java.time.temporal.TemporalAdjusters
 
@@ -29,7 +30,7 @@ class ActivityController() {
                     weeklySteps = receive.weeklySteps
                 )
             )
-            val leader = Achievements.getLeader()
+            val leader = CurrentLeader.getLeader()
             println("User ${receive.login} fetched data, steps: ${receive.steps}")
             call.respond(
                 UserActivityResponse(
@@ -57,23 +58,22 @@ class ActivityController() {
         val zone: ZoneId = ZoneId.systemDefault()
         weeklyResetJob = schedulerScope.launch {
             while (isActive) {
-                val now: ZonedDateTime = ZonedDateTime.now(zone)
-                val nextMondayMidnight: ZonedDateTime = now
+                val now = ZonedDateTime.now(zone)
+                val nextMondayMidnight = now
                     .with(TemporalAdjusters.next(DayOfWeek.MONDAY))
                     .with(LocalTime.MIDNIGHT)
 
                 val delayMillis = Duration.between(now, nextMondayMidnight).toMillis()
-                if (delayMillis > 0) {
-                    delay(delayMillis)
-                }
+                delay(delayMillis)
 
                 try {
-                    val updated = Users.resetAllWeeklySteps()
+                    val updated = newSuspendedTransaction {
+                        Users.resetAllWeeklySteps()
+                    }
                     println("[WeeklyReset] Reset weeklySteps to 0 for $updated users")
                 } catch (e: Exception) {
                     println("[WeeklyReset] Error: ${e.message}")
                 }
-                delay(Duration.ofDays(7).toMillis())
             }
         }
 
