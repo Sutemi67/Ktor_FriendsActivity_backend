@@ -12,10 +12,10 @@ object Users : Table() {
     private val login = varchar(name = "login", length = 25)
     private val password = varchar(name = "password", length = 25)
     private val steps = integer(name = "steps")
-    private val weeklySteps = integer(name = "weeklySteps")
+    private val weeklySteps = integer(name = "weeklysteps")
 
     //    private val wasBestUserTimes = integer(name = "wasBestUserTimes")
-    private val changeLogin = varchar(name = "changeLogin", length = 25)
+    private val changeLogin = varchar(name = "changelogin", length = 25)
 
     fun insert(userDTO: UserDTO) {
         try {
