@@ -8,6 +8,7 @@ import org.jetbrains.exposed.v1.jdbc.update
 object CurrentLeader : Table() {
     private val currentLeader = varchar(name = "currentleader", length = 25)
 
+    // todo проверить на вставку нового победителя на новом сервере, а так же проверить авто обновление
     fun updateLeader(winnerLogin: String) {
         transaction {
             CurrentLeader.update {
