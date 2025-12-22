@@ -141,25 +141,25 @@ object Users : Table() {
 //            println("Users.kt, resetAllWeeklySteps -> ${e.message}")
 //        }
 //    }
-    fun resetAllWeeklySteps() {
+    fun resetAllWeeklySteps(): Int = transaction {
         try {
-            transaction {
-                val leader = Users
-                    .selectAll()
-                    .orderBy(weeklySteps to SortOrder.DESC, login to SortOrder.ASC)
-                    .firstOrNull()
+            val leader = Users
+                .selectAll()
+                .orderBy(weeklySteps to SortOrder.DESC, login to SortOrder.ASC)
+                .firstOrNull()
 
-                leader?.let {
-                    CurrentLeader.updateLeader(it[login])
-                }
+            leader?.let {
+                CurrentLeader.updateLeader(it[login])
+            }
 
-                Users.update({ weeklySteps neq 0 }) {
-                    it[weeklySteps] = 0
-                }
+            val updatedCount = Users.update({ weeklySteps neq 0 }) {
+                it[Users.weeklySteps] = 0
             }
             println("Users.kt, resetAllWeeklySteps -> Weekly steps reset and leader updated successfully")
+            updatedCount
         } catch (e: Exception) {
             println("Users.kt, resetAllWeeklySteps -> Error: ${e.message}")
+            0
         }
     }
 }

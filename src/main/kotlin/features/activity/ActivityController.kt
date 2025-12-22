@@ -7,7 +7,6 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import kotlinx.coroutines.*
-import org.jetbrains.exposed.v1.jdbc.transactions.experimental.newSuspendedTransaction
 import java.time.*
 import java.time.temporal.TemporalAdjusters
 
@@ -42,17 +41,11 @@ class ActivityController() {
         }
     }
 
-    suspend fun loadUserData(call: ApplicationCall) {
-        try {
-            val receive = call.receive<UserLogin>()
-            val data = Users.loadUserData(receive.login)
-            call.respond(data)
-        } catch (e: Exception) {
-            call.respond(HttpStatusCode.BadRequest, message = "Не удалось соединиться с базой данных.")
-        }
-    }
-
     fun startWeeklyResetScheduler(application: Application) {
+        if (weeklyResetJob?.isActive == true) {
+            println("WeeklyReset -> Scheduler already running!")
+            return
+        }
         if (weeklyResetJob != null) return
 
         val zone: ZoneId = ZoneId.systemDefault()
@@ -63,17 +56,11 @@ class ActivityController() {
                     .with(TemporalAdjusters.next(DayOfWeek.MONDAY))
                     .with(LocalTime.MIDNIGHT)
 
-                val delayMillis = Duration.between(now, nextMondayMidnight).toMillis()
+                val delayMillis = Duration.between(now, nextMondayMidnight).toMillis().coerceAtLeast(0)
                 delay(delayMillis)
 
-                try {
-                    val updated = newSuspendedTransaction {
-                        Users.resetAllWeeklySteps()
-                    }
-                    println("[WeeklyReset] Reset weeklySteps to 0 for $updated users")
-                } catch (e: Exception) {
-                    println("[WeeklyReset] Error: ${e.message}")
-                }
+                val updatedCount = Users.resetAllWeeklySteps()
+                println("WeeklyReset -> Reset weeklySteps for $updatedCount users")
             }
         }
 
