@@ -2,6 +2,7 @@ package apc.appcradle.database.users
 
 import apc.appcradle.database.ahievements.CurrentLeader
 import apc.appcradle.features.activity.UsersActivity
+import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
@@ -13,8 +14,6 @@ object Users : Table() {
     private val password = varchar(name = "password", length = 25)
     private val steps = integer(name = "steps")
     private val weeklySteps = integer(name = "weeklysteps")
-
-    //    private val wasBestUserTimes = integer(name = "wasBestUserTimes")
     private val changeLogin = varchar(name = "changelogin", length = 25)
 
     fun insert(userDTO: UserDTO) {
@@ -88,12 +87,11 @@ object Users : Table() {
             }
             transaction {
                 val userList = Users.selectAll().toList()
-                list = userList.map { it ->
+                list = userList.map {
                     UsersActivity(
                         login = it[login],
                         steps = it[steps],
                         weeklySteps = it[weeklySteps],
-//                        wasBestUserTimes = it[wasBestUserTimes]
                     )
                 }.sortedByDescending { it.weeklySteps }
             }
@@ -118,33 +116,50 @@ object Users : Table() {
         }
     }
 
+    //    fun resetAllWeeklySteps() {
+//        try {
+//            transaction {
+//                val userList = Users.selectAll().toList()
+//                val bestUserWeekly = userList.map { user ->
+//                    UsersActivity(
+//                        login = user[login],
+//                        steps = user[steps],
+//                        weeklySteps = user[weeklySteps],
+//                    )
+//                }.maxByOrNull { it.weeklySteps }
+//
+//                if (bestUserWeekly != null) {
+//                    CurrentLeader.updateLeader(bestUserWeekly.login)
+//                }
+//
+//                Users.update {
+//                    it[weeklySteps] = 0
+//                }
+//            }
+//            println("Users.kt, resetAllWeeklySteps -> All weekly data has cleared successfully")
+//        } catch (e: Exception) {
+//            println("Users.kt, resetAllWeeklySteps -> ${e.message}")
+//        }
+//    }
     fun resetAllWeeklySteps() {
         try {
             transaction {
-                val userList = Users.selectAll().toList()
-                val bestUserWeekly = userList.map { it ->
-                    UsersActivity(
-                        login = it[login],
-                        steps = it[steps],
-                        weeklySteps = it[weeklySteps],
-//                        wasBestUserTimes = it[wasBestUserTimes]
-                    )
-                }.maxByOrNull { it.weeklySteps }
+                val leader = Users
+                    .selectAll()
+                    .orderBy(weeklySteps to SortOrder.DESC, login to SortOrder.ASC)
+                    .firstOrNull()
 
-                if (bestUserWeekly != null) {
-                    CurrentLeader.updateLeader(bestUserWeekly.login)
-//                    Users.update({ login eq bestUserWeekly.login }) {
-//                        it[wasBestUserTimes] = bestUserWeekly.wasBestUserTimes + 1
-//                    }
+                leader?.let {
+                    CurrentLeader.updateLeader(it[login])
                 }
 
-                Users.update {
+                Users.update({ weeklySteps neq 0 }) {
                     it[weeklySteps] = 0
                 }
             }
-            println("Users.kt, resetAllWeeklySteps -> All weekly data has cleared successfully")
+            println("Users.kt, resetAllWeeklySteps -> Weekly steps reset and leader updated successfully")
         } catch (e: Exception) {
-            println("Users.kt, resetAllWeeklySteps -> ${e.message}")
+            println("Users.kt, resetAllWeeklySteps -> Error: ${e.message}")
         }
     }
 }
