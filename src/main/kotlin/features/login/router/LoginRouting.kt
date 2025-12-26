@@ -1,10 +1,11 @@
-package apc.appcradle.features.login
+package apc.appcradle.features.login.router
 
+import apc.appcradle.features.login.data.LoginRepository
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
 
 fun Application.configureLoginRouting() {
-    val controller = LoginController()
+    val controller = LoginRepository()
 
     routing {
         post("/login") {

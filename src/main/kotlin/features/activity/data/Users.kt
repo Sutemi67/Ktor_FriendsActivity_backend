@@ -1,7 +1,7 @@
-package apc.appcradle.database.users
+package apc.appcradle.features.activity.data
 
-import apc.appcradle.database.ahievements.CurrentLeader
-import apc.appcradle.features.activity.UsersActivity
+import apc.appcradle.features.activity.model.UserSQL
+import apc.appcradle.features.activity.model.UserActivityRequest
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.jdbc.insert
@@ -16,14 +16,14 @@ object Users : Table() {
     private val weeklySteps = integer(name = "weeklysteps")
     private val changeLogin = varchar(name = "changelogin", length = 25)
 
-    fun insert(userDTO: UserDTO) {
+    fun insert(userSQL: UserSQL) {
         try {
             transaction {
                 Users.insert {
-                    it[login] = userDTO.login
-                    it[password] = userDTO.password
-                    it[steps] = userDTO.steps
-                    it[weeklySteps] = userDTO.weeklySteps
+                    it[login] = userSQL.login
+                    it[password] = userSQL.password
+                    it[steps] = userSQL.steps
+                    it[weeklySteps] = userSQL.weeklySteps
                 }
             }
         } catch (e: Exception) {
@@ -31,13 +31,13 @@ object Users : Table() {
         }
     }
 
-    fun fetchUser(login: String): UserDTO? {
+    fun getUserData(login: String): UserSQL? {
         return try {
             transaction {
                 val userModel = Users.selectAll()
                     .where { Users.login eq login }
                     .single()
-                UserDTO(
+                UserSQL(
                     login = userModel[Users.login],
                     password = userModel[password],
                     steps = userModel[steps],
@@ -50,45 +50,19 @@ object Users : Table() {
         }
     }
 
-    fun loadUserData(login: String): FetchedData {
-        return try {
-            val user = fetchUser(login)
-            if (user != null) {
-                val whoLeader = CurrentLeader.getLeader()
-                FetchedData(
-                    steps = user.steps,
-                    weeklySteps = user.weeklySteps,
-                    currentLeader = whoLeader,
-                )
-            } else {
-                FetchedData(
-                    steps = 0,
-                    weeklySteps = 0,
-                    errorMessage = "User not found"
-                )
-            }
-        } catch (e: Exception) {
-            FetchedData(
-                steps = 0,
-                weeklySteps = 0,
-                errorMessage = e.message
-            )
-        }
-    }
-
-    fun loadStepsGetList(userDTO: UserDTO): List<UsersActivity> {
+    fun loadUserStepsGetActivityList(userSQL: UserSQL): List<UserActivityRequest> {
         try {
-            var list = emptyList<UsersActivity>()
+            var list = emptyList<UserActivityRequest>()
             transaction {
-                Users.update({ login eq userDTO.login }) {
-                    it[steps] = userDTO.steps
-                    it[weeklySteps] = userDTO.weeklySteps
+                Users.update({ login eq userSQL.login }) {
+                    it[steps] = userSQL.steps
+                    it[weeklySteps] = userSQL.weeklySteps
                 }
             }
             transaction {
                 val userList = Users.selectAll().toList()
                 list = userList.map {
-                    UsersActivity(
+                    UserActivityRequest(
                         login = it[login],
                         steps = it[steps],
                         weeklySteps = it[weeklySteps],
@@ -97,16 +71,16 @@ object Users : Table() {
             }
             return list
         } catch (e: Exception) {
-            println("Users.kt, loadStepsGetList: ${userDTO.login}, ${e.message}")
+            println("Users.kt, loadStepsGetList: ${userSQL.login}, ${e.message}")
             return emptyList()
         }
     }
 
-    fun changeLogin(userDTO: UserDTO): String? {
+    fun changeLogin(userSQL: UserSQL): String? {
         return try {
             transaction {
-                Users.update({ login eq userDTO.login }) {
-                    it[login] = userDTO.changeLogin ?: ""
+                Users.update({ login eq userSQL.login }) {
+                    it[login] = userSQL.changeLogin ?: ""
                 }
             }
             null

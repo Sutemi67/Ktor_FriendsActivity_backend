@@ -1,6 +1,6 @@
-package apc.appcradle.database.users
+package apc.appcradle.features.activity.model
 
-data class UserDTO(
+data class UserSQL(
     val login: String,
     val password: String,
     val steps: Int,

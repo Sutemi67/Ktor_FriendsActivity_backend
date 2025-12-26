@@ -1,5 +1,6 @@
-package apc.appcradle.database.tokens
+package apc.appcradle.features.login.data
 
+import apc.appcradle.features.login.model.TokenDTO
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.upsert

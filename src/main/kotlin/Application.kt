@@ -1,8 +1,9 @@
 package apc.appcradle
 
-import apc.appcradle.features.activity.configureUserActivityRouting
-import apc.appcradle.features.login.configureLoginRouting
-import apc.appcradle.features.register.configureRegisterRouting
+import apc.appcradle.common_modules.configureSerialization
+import apc.appcradle.features.activity.router.configureUserActivityRouting
+import apc.appcradle.features.login.router.configureLoginRouting
+import apc.appcradle.features.register.router.configureRegisterRouting
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -28,16 +29,13 @@ fun main(args: Array<String>) {
         port = 6655,
         host = "0.0.0.0"
     ) {
-        module()
+        connectModules()
     }.start(wait = true)
 }
 
-
-fun Application.module() {
+fun Application.connectModules() {
     configureSerialization()
-    configureSecurity()
     configureRegisterRouting()
     configureLoginRouting()
     configureUserActivityRouting()
-    configureRouting()
 }

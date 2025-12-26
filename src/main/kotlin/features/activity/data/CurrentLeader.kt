@@ -1,4 +1,4 @@
-package apc.appcradle.database.ahievements
+package apc.appcradle.features.activity.data
 
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.jdbc.selectAll
