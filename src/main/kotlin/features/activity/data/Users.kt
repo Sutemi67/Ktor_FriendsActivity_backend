@@ -1,10 +1,12 @@
 package apc.appcradle.features.activity.data
 
-import apc.appcradle.features.activity.model.UserSQL
 import apc.appcradle.features.activity.model.UserActivityRequest
+import apc.appcradle.features.activity.model.UserSQL
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.core.statements.UpsertSqlExpressionBuilder.greater
 import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
@@ -90,36 +92,11 @@ object Users : Table() {
         }
     }
 
-    //    fun resetAllWeeklySteps() {
-//        try {
-//            transaction {
-//                val userList = Users.selectAll().toList()
-//                val bestUserWeekly = userList.map { user ->
-//                    UsersActivity(
-//                        login = user[login],
-//                        steps = user[steps],
-//                        weeklySteps = user[weeklySteps],
-//                    )
-//                }.maxByOrNull { it.weeklySteps }
-//
-//                if (bestUserWeekly != null) {
-//                    CurrentLeader.updateLeader(bestUserWeekly.login)
-//                }
-//
-//                Users.update {
-//                    it[weeklySteps] = 0
-//                }
-//            }
-//            println("Users.kt, resetAllWeeklySteps -> All weekly data has cleared successfully")
-//        } catch (e: Exception) {
-//            println("Users.kt, resetAllWeeklySteps -> ${e.message}")
-//        }
-//    }
     fun resetAllWeeklySteps(): Int = transaction {
         try {
             val leader = Users
-                .selectAll()
-                .orderBy(weeklySteps to SortOrder.DESC, login to SortOrder.ASC)
+                .select(weeklySteps greater 0)
+                .orderBy(weeklySteps to SortOrder.DESC)
                 .firstOrNull()
 
             leader?.let {
@@ -127,7 +104,7 @@ object Users : Table() {
             }
 
             val updatedCount = Users.update({ weeklySteps neq 0 }) {
-                it[Users.weeklySteps] = 0
+                it[weeklySteps] = 0
             }
             println("Users.kt, resetAllWeeklySteps -> Weekly steps reset and leader updated successfully")
             updatedCount

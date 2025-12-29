@@ -10,12 +10,14 @@ import io.ktor.server.response.*
 import kotlinx.coroutines.*
 import java.time.*
 import java.time.temporal.TemporalAdjusters
+import java.util.concurrent.atomic.AtomicBoolean
 
 class ActivityRepository() {
 
     private val schedulerScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var weeklyResetJob: Job? = null
 
+    private val schedulerStarted = AtomicBoolean(false)
     suspend fun updateSteps(call: ApplicationCall) {
         val receive = call.receive<UserActivityRequest>()
         val userSQL = Users.getUserData(receive.login)
@@ -77,11 +79,13 @@ class ActivityRepository() {
     }
 
     fun startWeeklyResetScheduler(application: Application) {
-        if (weeklyResetJob?.isActive == true) {
+//        if (weeklyResetJob?.isActive == true) {
+        if (!schedulerStarted.compareAndSet(false, true)) {
             println("WeeklyReset -> Scheduler already running!")
             return
         }
         if (weeklyResetJob != null) return
+        println("----> weekly reset is scheduled!!")
 
         val zone: ZoneId = ZoneId.systemDefault()
         weeklyResetJob = schedulerScope.launch {
@@ -91,8 +95,7 @@ class ActivityRepository() {
                     .with(TemporalAdjusters.next(DayOfWeek.MONDAY))
                     .with(LocalTime.MIDNIGHT)
 
-                val delayMillis = Duration.between(now, nextMondayMidnight).toMillis().coerceAtLeast(0)
-                delay(delayMillis)
+                delay(Duration.between(now, nextMondayMidnight).toMillis())
 
                 val updatedCount = Users.resetAllWeeklySteps()
                 println("WeeklyReset -> Reset weeklySteps for $updatedCount users")
