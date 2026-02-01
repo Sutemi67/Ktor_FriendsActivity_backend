@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UsersActivityResponse(
-    val friendsList: List<UserActivityRequest>,
+    val friendsList: List<UserFetchActivityRequest>,
     val errorMessage: String?,
     val leader: String?
 )

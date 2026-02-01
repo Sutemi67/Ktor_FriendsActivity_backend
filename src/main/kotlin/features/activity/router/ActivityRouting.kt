@@ -12,7 +12,7 @@ fun Application.configureUserActivityRouting() {
         post("/post_activity") {
             controller.updateSteps(call)
         }
-        post("/fetch") {
+        get("/fetch/{login}") {
             controller.getUserData(call)
         }
     }

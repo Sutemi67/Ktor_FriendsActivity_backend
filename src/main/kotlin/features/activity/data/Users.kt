@@ -1,6 +1,6 @@
 package apc.appcradle.features.activity.data
 
-import apc.appcradle.features.activity.model.UserActivityRequest
+import apc.appcradle.features.activity.model.UserFetchActivityRequest
 import apc.appcradle.features.activity.model.UserSQL
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.Table
@@ -34,27 +34,25 @@ object Users : Table() {
     }
 
     fun getUserData(login: String): UserSQL? {
-        return try {
-            transaction {
-                val userModel = Users.selectAll()
-                    .where { Users.login eq login }
-                    .single()
-                UserSQL(
-                    login = userModel[Users.login],
-                    password = userModel[password],
-                    steps = userModel[steps],
-                    weeklySteps = userModel[weeklySteps]
-                )
-            }
-        } catch (e: Exception) {
-            println("Users.kt, fetchUser -> login: $login, error: ${e.message}")
-            null
+        return transaction {
+            Users.select(Users.login)
+                .where { Users.login eq login }
+                .map { userModel ->
+                    UserSQL(
+                        login = userModel[Users.login],
+                        password = userModel[password],
+                        steps = userModel[steps],
+                        weeklySteps = userModel[weeklySteps]
+                    )
+                }
+                .singleOrNull()
         }
     }
 
-    fun loadUserStepsGetActivityList(userSQL: UserSQL): List<UserActivityRequest> {
+
+    fun loadUserStepsGetActivityList(userSQL: UserSQL): List<UserFetchActivityRequest> {
         try {
-            var list = emptyList<UserActivityRequest>()
+            var list = emptyList<UserFetchActivityRequest>()
             transaction {
                 Users.update({ login eq userSQL.login }) {
                     it[steps] = userSQL.steps
@@ -64,7 +62,7 @@ object Users : Table() {
             transaction {
                 val userList = Users.selectAll().toList()
                 list = userList.map {
-                    UserActivityRequest(
+                    UserFetchActivityRequest(
                         login = it[login],
                         steps = it[steps],
                         weeklySteps = it[weeklySteps],

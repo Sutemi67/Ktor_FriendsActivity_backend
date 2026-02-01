@@ -1,7 +1,7 @@
 package apc.appcradle.features.activity.data
 
-import apc.appcradle.features.activity.model.UserActivityRequest
 import apc.appcradle.features.activity.model.UserDataResponse
+import apc.appcradle.features.activity.model.UserFetchActivityRequest
 import apc.appcradle.features.activity.model.UsersActivityResponse
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -19,7 +19,7 @@ class ActivityRepository() {
 
     private val schedulerStarted = AtomicBoolean(false)
     suspend fun updateSteps(call: ApplicationCall) {
-        val receive = call.receive<UserActivityRequest>()
+        val receive = call.receive<UserFetchActivityRequest>()
         val userSQL = Users.getUserData(receive.login)
 
         if (userSQL == null) {
@@ -45,16 +45,13 @@ class ActivityRepository() {
     }
 
     suspend fun getUserData(call: ApplicationCall) {
-
-        val receive = call.receive<UserActivityRequest>()
-        val userSQL = Users.getUserData(receive.login)
-
         try {
+            val login = call.parameters["login"]!!
+            val userSQL = Users.getUserData(login)
+
             if (userSQL == null) {
                 call.respond(
                     UserDataResponse(
-                        steps = 0,
-                        weeklySteps = 0,
                         errorMessage = "User not found"
                     )
                 )
@@ -63,15 +60,12 @@ class ActivityRepository() {
                     UserDataResponse(
                         steps = userSQL.steps,
                         weeklySteps = userSQL.weeklySteps,
-                        errorMessage = null
                     )
                 )
             }
         } catch (e: Exception) {
             call.respond(
                 UserDataResponse(
-                    steps = 0,
-                    weeklySteps = 0,
                     errorMessage = "Connecting error. ${e.message}"
                 )
             )

@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UserDataResponse(
-    val steps: Int,
-    val weeklySteps: Int,
+    val steps: Int? = null,
+    val weeklySteps: Int? = null,
     val errorMessage: String? = null
 )
