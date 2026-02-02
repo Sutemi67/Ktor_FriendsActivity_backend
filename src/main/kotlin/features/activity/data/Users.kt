@@ -33,20 +33,18 @@ object Users : Table() {
         }
     }
 
-    fun getUserData(login: String): UserSQL? {
-        return transaction {
-            Users.select(Users.login)
-                .where { Users.login eq login }
-                .map { userModel ->
-                    UserSQL(
-                        login = userModel[Users.login],
-                        password = userModel[password],
-                        steps = userModel[steps],
-                        weeklySteps = userModel[weeklySteps]
-                    )
-                }
-                .singleOrNull()
-        }
+    fun getUserData(login: String): UserSQL? = transaction {
+        Users.selectAll()
+            .where { Users.login eq login }
+            .map { userModel ->
+                UserSQL(
+                    login = userModel[Users.login],
+                    password = userModel[password],
+                    steps = userModel[steps],
+                    weeklySteps = userModel[weeklySteps],
+                )
+            }
+            .singleOrNull()
     }
 
 

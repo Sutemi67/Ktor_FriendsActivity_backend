@@ -1,3 +1,5 @@
+import io.ktor.plugin.features.*
+
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.ktor)
@@ -37,19 +39,24 @@ dependencies {
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
 
-    //BD Exposed & PostgreSQL
+    //BD Exposed & PostgresSQL
     implementation(libs.exposed.core)
     implementation(libs.exposed.jdbc)
     implementation(libs.h2)
     implementation("org.postgresql:postgresql:42.7.7")
 }
 
-tasks.jar.configure {
-    manifest {
-        attributes(mapOf("Main-Class" to "apc.appcradle.ApplicationKt"))
+ktor {
+    fatJar {
+        archiveFileName.set("server-all.jar")
     }
-    configurations["compileClasspath"].forEach { file: File ->
-        from(zipTree(file.absoluteFile))
+    docker {
+        localImageName.set("delta67admin/friends-activity-backend")
+        customBaseImage.set("eclipse-temurin:17-jre")
+        portMappings.set(
+            listOf(
+                DockerPortMapping(6655, 6655)
+            )
+        )
     }
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }

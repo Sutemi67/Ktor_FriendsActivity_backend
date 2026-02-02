@@ -1,9 +1,8 @@
 package apc.appcradle.features.login.data
 
 import apc.appcradle.features.activity.data.Users
-import apc.appcradle.features.login.model.LoginChangeRequest
-import apc.appcradle.features.login.model.LoginRequest
-import apc.appcradle.features.login.model.LoginResponse
+import apc.appcradle.features.login.model.Requests
+import apc.appcradle.features.login.model.Responses
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -13,7 +12,7 @@ import java.util.*
 class LoginRepository() {
 
     suspend fun loginUser(call: ApplicationCall) {
-        val receive = call.receive<LoginRequest>()
+        val receive = call.receive<Requests.LoginRequest>()
         val userDTO = Users.getUserData(receive.login)
 
         if (userDTO == null) {
@@ -22,7 +21,7 @@ class LoginRepository() {
         } else {
             if (userDTO.password == receive.password) {
                 val token = UUID.randomUUID().toString()
-                call.respond(LoginResponse(token = token))
+                call.respond(Responses.LoginResponse(token = token))
                 println("User ${receive.login} - successful login, got a new token")
             } else {
                 call.respond(HttpStatusCode.BadRequest, "Password is incorrect")
@@ -32,7 +31,7 @@ class LoginRepository() {
     }
 
     suspend fun changeLogin(call: ApplicationCall) {
-        val receive = call.receive<LoginChangeRequest>()
+        val receive = call.receive<Requests.LoginChangeRequest>()
         val userSQL = Users.getUserData(receive.login)
         if (userSQL == null) {
             call.respond(HttpStatusCode.BadRequest, "User does not exists")
@@ -40,7 +39,7 @@ class LoginRepository() {
         } else {
             val isSuccess = Users.changeLogin(userSQL.copy(changeLogin = receive.newLogin))
             if (isSuccess.isNullOrEmpty()) {
-                call.respond(HttpStatusCode.OK, "login changed")
+                call.respond(Responses.LoginChangeResponse(message = "ok!"))
                 println("User ${userSQL.login} changed login to ${receive.newLogin}")
             } else {
                 call.respond(HttpStatusCode.BadRequest, "error due to nick changing")
