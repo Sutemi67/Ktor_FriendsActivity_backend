@@ -91,7 +91,8 @@ object Users : Table() {
     fun resetAllWeeklySteps(): Int = transaction {
         try {
             val leader = Users
-                .select(weeklySteps greater 0)
+                .selectAll()
+                .where { weeklySteps greater 0 }
                 .orderBy(weeklySteps to SortOrder.DESC)
                 .firstOrNull()
 
