@@ -52,7 +52,8 @@ ktor {
     }
     docker {
         localImageName.set("delta67admin/friends-activity-backend")
-        customBaseImage.set("eclipse-temurin:17-jre")
+        customBaseImage.set("eclipse-temurin:17-jre-alpine")
+//        customBaseImage.set("eclipse-temurin:17-jre")
         portMappings.set(
             listOf(
                 DockerPortMapping(6655, 6655)

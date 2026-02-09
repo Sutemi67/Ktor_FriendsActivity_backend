@@ -46,7 +46,6 @@ object Users : Table() {
             .singleOrNull()
     }
 
-
     fun loadUserStepsGetActivityList(userSQL: UserSQL): List<UserFetchActivityRequest> {
         try {
             var list = emptyList<UserFetchActivityRequest>()
