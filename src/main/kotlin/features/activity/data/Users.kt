@@ -4,12 +4,11 @@ import apc.appcradle.features.activity.model.UserFetchActivityRequest
 import apc.appcradle.features.activity.model.UserSQL
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.Table
-import org.jetbrains.exposed.v1.core.statements.UpsertSqlExpressionBuilder.greater
 import org.jetbrains.exposed.v1.jdbc.insert
-import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
+import java.time.LocalDateTime
 
 object Users : Table() {
     private val login = varchar(name = "login", length = 25)
@@ -103,7 +102,7 @@ object Users : Table() {
             val updatedCount = Users.update({ weeklySteps neq 0 }) {
                 it[weeklySteps] = 0
             }
-            println("Users.kt, resetAllWeeklySteps -> Weekly steps reset and leader updated successfully")
+            println("Users.kt, resetAllWeeklySteps:${LocalDateTime.now()} -> Weekly steps reset and leader updated successfully")
             updatedCount
         } catch (e: Exception) {
             println("Users.kt, resetAllWeeklySteps -> Error: ${e.message}")
