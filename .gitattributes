@@ -1,0 +1,4 @@
+# Normalise line endings so shell scripts stay LF on Linux
+gradlew text eol=lf
+*.sh text eol=lf
+gradlew.bat text eol=crlf
