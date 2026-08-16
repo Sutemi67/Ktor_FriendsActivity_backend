@@ -1,0 +1,41 @@
+name: Build native executable
+
+on:
+  push:
+    branches: [ "master" ]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  native-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          distribution: 'graalvm'
+          java-version: '21'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          cache: 'gradle'
+
+      - name: Run tests
+        run: ./gradlew --no-daemon test
+
+      - name: Build native image
+        run: ./gradlew --no-daemon nativeCompile
+
+      - name: Upload native binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fa-backend-linux-x86_64
+          path: build/native/nativeCompile/fa-backend
+
+      - name: Attach to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/native/nativeCompile/fa-backend
