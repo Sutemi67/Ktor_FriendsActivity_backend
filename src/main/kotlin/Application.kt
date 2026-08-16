@@ -11,15 +11,18 @@ import io.ktor.server.plugins.contentnegotiation.*
 import org.jetbrains.exposed.v1.jdbc.Database
 
 fun main(args: Array<String>) {
+    val dbUrl = System.getenv("DB_URL") ?: "jdbc:postgresql://172.17.0.1:5432/friends_activity"
+    val dbDriver = System.getenv("DB_DRIVER") ?: "org.postgresql.Driver"
+    val dbUser = System.getenv("DB_USER")
+    val dbPassword = System.getenv("DB_PASSWORD")
+
     try {
-        with(ServerPasswords) {
-            Database.connect(
-                url = FROM_DOCKER_URL,
-                driver = DRIVER,
-                user = USER,
-                password = PASSWORD
-            )
-        }
+        Database.connect(
+            url = dbUrl,
+            driver = dbDriver,
+            user = dbUser,
+            password = dbPassword
+        )
     } catch (e: Exception) {
         println("cant connect to database -> ${e.message}")
     }

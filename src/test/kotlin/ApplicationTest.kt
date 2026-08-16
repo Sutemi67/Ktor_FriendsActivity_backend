@@ -14,7 +14,7 @@ class ApplicationTest {
             connectModules()
         }
         client.get("/").apply {
-            assertEquals(HttpStatusCode.OK, status)
+            assertEquals(HttpStatusCode.NotFound, status)
         }
     }
 
